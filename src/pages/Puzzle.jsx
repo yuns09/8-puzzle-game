@@ -1,137 +1,149 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 
-const GRID_SIZE = 3;
+export default function Puzzle() {
+  const size = 3;
+  const totalTiles = size * size;
 
-// Initial solved state
-const SOLVED_TILES = [1, 2, 3, 4, 5, 6, 7, 8, null];
-
-function Puzzle() {
   const [tiles, setTiles] = useState([]);
   const [moves, setMoves] = useState(0);
-  const [isSolved, setIsSolved] = useState(false);
+  const [seconds, setSeconds] = useState(0);
+  const [bestScore, setBestScore] = useState(
+    localStorage.getItem("bestScore") || null
+  );
+  const [gameStarted, setGameStarted] = useState(false);
 
-  // Shuffle puzzle on first load
+  // Generate solvable shuffled tiles
+  const shuffleTiles = () => {
+    let arr = [...Array(totalTiles - 1).keys()].map((x) => x + 1);
+    arr.push(null);
+
+    return arr.sort(() => Math.random() - 0.5);
+  };
+
   useEffect(() => {
-    restartGame();
+    setTiles(shuffleTiles());
   }, []);
 
-  // Shuffle function
-  const shuffleTiles = () => {
-    let shuffled = [...SOLVED_TILES];
-
-    do {
-      shuffled.sort(() => Math.random() - 0.5);
-    } while (!isSolvable(shuffled) || isSolvedState(shuffled));
-
-    return shuffled;
-  };
-
-  // Check solvability of puzzle
-  const isSolvable = (tiles) => {
-    const numbers = tiles.filter((tile) => tile !== null);
-    let inversions = 0;
-
-    for (let i = 0; i < numbers.length; i++) {
-      for (let j = i + 1; j < numbers.length; j++) {
-        if (numbers[i] > numbers[j]) inversions++;
-      }
+  // Timer
+  useEffect(() => {
+    let timer;
+    if (gameStarted) {
+      timer = setInterval(() => {
+        setSeconds((prev) => prev + 1);
+      }, 1000);
     }
-    return inversions % 2 === 0;
-  };
+    return () => clearInterval(timer);
+  }, [gameStarted]);
 
-  // Check if puzzle is solved
-  const isSolvedState = (tiles) => {
-    return SOLVED_TILES.every((tile, index) => tile === tiles[index]);
-  };
-
-  // Handle tile click
-  const handleTileClick = (index) => {
-    if (isSolved) return;
-
+  const moveTile = (index) => {
     const emptyIndex = tiles.indexOf(null);
 
-    const row = Math.floor(index / GRID_SIZE);
-    const col = index % GRID_SIZE;
-    const emptyRow = Math.floor(emptyIndex / GRID_SIZE);
-    const emptyCol = emptyIndex % GRID_SIZE;
-
-    // Allow move only if tile is adjacent to empty space
-    const isAdjacent =
-      Math.abs(row - emptyRow) + Math.abs(col - emptyCol) === 1;
-
-    if (!isAdjacent) return;
-
-    const newTiles = [...tiles];
-    [newTiles[index], newTiles[emptyIndex]] = [
-      newTiles[emptyIndex],
-      newTiles[index],
+    const validMoves = [
+      index - 1,
+      index + 1,
+      index - size,
+      index + size,
     ];
 
-    setTiles(newTiles);
-    setMoves((prev) => prev + 1);
+    if (validMoves.includes(emptyIndex)) {
+      let newTiles = [...tiles];
+      [newTiles[index], newTiles[emptyIndex]] = [
+        newTiles[emptyIndex],
+        newTiles[index],
+      ];
 
-    if (isSolvedState(newTiles)) {
-      setIsSolved(true);
+      setTiles(newTiles);
+      setMoves(moves + 1);
+      setGameStarted(true);
     }
   };
 
-  // Restart game
+  const isSolved = () => {
+    for (let i = 0; i < totalTiles - 1; i++) {
+      if (tiles[i] !== i + 1) return false;
+    }
+    return true;
+  };
+
+  // Save Best Score
+  useEffect(() => {
+    if (isSolved() && moves > 0) {
+      if (!bestScore || moves < bestScore) {
+        localStorage.setItem("bestScore", moves);
+        setBestScore(moves);
+      }
+      setGameStarted(false);
+    }
+  }, [tiles]);
+
   const restartGame = () => {
     setTiles(shuffleTiles());
     setMoves(0);
-    setIsSolved(false);
+    setSeconds(0);
+    setGameStarted(false);
   };
 
   return (
-    <div className="flex flex-col items-center">
-      <h1 className="text-3xl font-bold mb-2">8 Tile Puzzle Game</h1>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 to-gray-900 flex flex-col items-center justify-center p-4">
 
-      <p className="mb-4 text-gray-600">
-        Try to arrange the numbers in ascending order
-      </p>
+      <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 text-center">
+        8 Number Sliding Puzzle
+      </h1>
+
+      {/* Stats Section */}
+      <div className="flex flex-col sm:flex-row gap-4 text-white mb-6 text-center">
+        <div className="bg-gray-800 px-4 py-2 rounded-lg shadow">
+          ⏱ Time: {seconds}s
+        </div>
+        <div className="bg-gray-800 px-4 py-2 rounded-lg shadow">
+          🔢 Moves: {moves}
+        </div>
+        <div className="bg-gray-800 px-4 py-2 rounded-lg shadow">
+          🏆 Best: {bestScore || "--"}
+        </div>
+      </div>
 
       {/* Puzzle Grid */}
       <div
-        className="grid gap-2 mb-4"
-        style={{ gridTemplateColumns: `repeat(${GRID_SIZE}, 70px)` }}
+        className="grid gap-2 bg-gray-800 p-3 rounded-xl shadow-lg"
+        style={{
+          gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))`,
+        }}
       >
         {tiles.map((tile, index) => (
-          <button
+          <div
             key={index}
-            onClick={() => handleTileClick(index)}
-            className={`h-16 w-16 text-xl font-semibold border rounded
+            onClick={() => moveTile(index)}
+            className={`flex items-center justify-center 
+              text-2xl md:text-3xl font-bold 
+              aspect-square w-20 sm:w-24 md:w-28
+              rounded-lg cursor-pointer
+              transition-all duration-300 ease-in-out
               ${
                 tile === null
-                  ? "bg-gray-300 cursor-default"
-                  : "bg-gray-200 hover:bg-gray-300"
+                  ? "bg-gray-900"
+                  : "bg-indigo-500 text-white hover:bg-indigo-600 active:scale-95"
               }`}
           >
             {tile}
-          </button>
+          </div>
         ))}
       </div>
 
-      <p className="mb-2 font-semibold">Moves: {moves}</p>
-
-      {isSolved && (
-        <p className="text-green-600 font-semibold mb-3">
-          🎉 You solved the puzzle!
-        </p>
+      {/* Solved Message */}
+      {isSolved() && moves > 0 && (
+        <div className="mt-4 text-green-400 font-bold text-lg animate-pulse">
+          🎉 Puzzle Solved!
+        </div>
       )}
 
+      {/* Restart Button */}
       <button
         onClick={restartGame}
-        className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+        className="mt-6 px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
       >
         Restart Game
       </button>
-
-      <p className="mt-6 text-sm text-gray-500">
-        Developed by Mo Yunus (ECE, 3rd Year)
-      </p>
     </div>
   );
 }
-
-export default Puzzle;
-
