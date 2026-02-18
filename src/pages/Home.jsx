@@ -6,8 +6,8 @@ function Home({ onStart }) {
       </h1>
 
       <p className="text-gray-600 mb-6 text-center max-w-xl">
-        This is a simple puzzle game built using React and Tailwind CSS
-        as part of the Bluestocks Software Development Internship assessment.
+        This is a simple puzzle game built using React and Tailwind CSS as part
+        of the Bluestocks Software Development Internship assessment.
       </p>
 
       <button
