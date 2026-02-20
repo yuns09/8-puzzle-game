@@ -1,15 +1,29 @@
-import Puzzle from './pages/Puzzle';
+import Puzzle from "./pages/Puzzle";
 
 function App() {
   return (
-    <div className="min-h-screen bg-brand-background font-body flex flex-col items-center">
-      <header className="w-full bg-brand-primary py-5 shadow-md">
-        <h1 className="text-center text-white text-3xl font-heading tracking-wide">
-          Daily Puzzle Challenge
-        </h1>
+    <div className="min-h-screen bg-gray-100 font-body">
+
+      {/* 🔵 Header */}
+      <header className="bg-blue-900 text-white py-4 shadow-lg">
+        <div className="max-w-4xl mx-auto px-4 flex justify-between items-center">
+          
+          <h1 className="text-2xl font-bold tracking-wide">
+            Bluestocks Daily Puzzle
+          </h1>
+
+          <p className="text-sm font-medium">
+            Developed by Yunus
+          </p>
+
+        </div>
       </header>
 
-      <Puzzle />
+      {/* 🧩 Puzzle Section */}
+      <main className="max-w-4xl mx-auto py-10">
+        <Puzzle />
+      </main>
+
     </div>
   );
 }
