@@ -61,6 +61,7 @@ The application uses React’s `useState` hook to manage the tile positions dyna
 ![Winning State](./assets/screenshot3.png)
 
 ---
+---
 
 ## 📦 Installation & Setup
 
@@ -69,6 +70,7 @@ Clone the repository:
 ```bash
 git clone https://github.com/yuns09/8-puzzle-game.git
 cd 8-puzzle-game
+
 
 👤 Author
 
