@@ -52,13 +52,13 @@ The application uses React’s `useState` hook to manage the tile positions dyna
 ## 📷 Screenshots
 
 ### 🟢 Game Start
-![Game Start](./assets/screenshot1.png)
+![Game Start](./assets/Screenshot1.png)
 
 ### 🟡 During Gameplay
-![Gameplay](./assets/screenshot2.png)
+![Gameplay](./assets/Screenshot2.png)
 
 ### 🏆 Winning State
-![Winning State](./assets/screenshot3.png)
+![Winning State](./assets/Screenshot3.png)
 
 ---
 ---
